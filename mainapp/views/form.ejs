@@ -1,0 +1,39 @@
+<form method="POST" class="mt-5" enctype="multipart/form-data">
+    <div class="form-group">
+        <label for="inputTitle">Наименование книги</label>
+        <input type="text"
+               value="<%= books.title %>"
+               name="title"
+               class="form-control"
+               id="inputTitle">
+    </div>
+
+    <div class="form-group">
+        <label for="inputDesc">Описание книги</label>
+        <textarea
+                rows="3"
+                name="description"
+                class="form-control"
+                id="inputDesc"
+        ><%= books.description %></textarea>
+    </div>
+
+    <div class="form-group">
+        <label for="inputTitle">Автор книги</label>
+        <input type="text"
+               value="<%= books.authors %>"
+               name="authors"
+               class="form-control"
+               id="inputAuthor">
+    </div>    
+
+
+    <div class="form-group">
+        <label for="inputTitle">Файл книги</label>
+        <input type="file" name="fileBook" />
+    </div>    
+
+    <div class="form-group text-right ">
+        <button type="submit" class="btn btn-primary">Сохранить</button>
+    </div>
+</form>
