@@ -1,10 +1,16 @@
 const express = require('express');
 const session = require('express-session');
+const http = require('http');
+const socketIO = require('socket.io');
 const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
 const bcrypt = require('bcryptjs'); //работаем с паролями
 const mongoose = require('mongoose');
 const User = require('./models/users'); // Путь к модели пользователей
+
+
+
+
 
 const errorMiddleware = require('./middleware/error');
 
@@ -12,6 +18,36 @@ const indexBoooks = require('./routes/index')
 const apiBoooks = require('./routes/books')
 
 const app = express();
+const server = http.Server(app);
+const io = socketIO(server);
+
+// Socket IO
+
+io.on('connection', (socket) => {
+  const {id} = socket;
+  console.log(`Socket connected: ${id}`);
+
+  // работа с комнатами (обсуждаем конкретную книгу)
+  const {roomName} = socket.handshake.query;
+  console.log(`Socket roomName: ${roomName}`);
+  socket.join(roomName);
+  socket.on('message-to-room', (msg) => {
+      msg.type = `room: ${roomName}`;
+      socket.to(roomName).emit('message-to-room', msg);
+      socket.emit('message-to-room', msg);
+  });
+
+  socket.on('disconnect', () => {
+      console.log(`Socket disconnected: ${id}`);
+  });
+});
+
+// END Socket IO
+
+
+
+
+
 
 // Функции для работы с паролями
 const hashPassword = async (password) => {
@@ -137,16 +173,17 @@ app.use(errorMiddleware);
 
 // Подключение к MongoDB и запуск сервера
 const PORT = 3000;
-const server = 'root:example@mongo:27017';
+const mongoserver = 'root:example@mongo:27017';
 const database = 'admin';
 
-mongoose.connect(`mongodb://${server}/${database}`, {
+// server.listen(3000);
+mongoose.connect(`mongodb://${mongoserver}/${database}`, {
   useNewUrlParser: true,
   useUnifiedTopology: true
 })
   .then(() => {
     console.log('MongoDB connected!!');
-    app.listen(PORT, () => console.log(`Сервер запущен на порту ${PORT}`));
+    server.listen(PORT, () => console.log(`Сервер запущен на порту ${PORT}`));
   })
   .catch((err) => {
     console.log('Failed to connect to MongoDB', err);
